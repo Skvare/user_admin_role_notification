@@ -4,4 +4,4 @@ description: 'Send notifications to users when administrator role is added'
 core_version_requirement: '^9 || ^10'
 package: 'Custom'
 dependencies:
-  - user
+  - drupal:user
