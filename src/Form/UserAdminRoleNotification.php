@@ -13,7 +13,8 @@ use Drupal\user_admin_role_notification\UserAdminRoleNotificationService;
  */
 class UserAdminRoleNotification extends ConfigFormBase {
 
-  /** A instance of the admin_content_notification helper services.
+  /**
+   * A instance of the admin_content_notification helper services.
    *
    * @var \Drupal\user_admin_role_notification\UserAdminRoleNotificationService
    */
@@ -63,7 +64,7 @@ class UserAdminRoleNotification extends ConfigFormBase {
     $form['user_admin_role_notification_email'] = [
       '#type' => 'textarea',
       '#title' => $this->t("Email Id's to whom the notification is to be sent, add comma separated emails in case of multiple recipients"),
-      '#default_value' => isset($user_admin_role_notification_email) ? $user_admin_role_notification_email : '',
+      '#default_value' => $user_admin_role_notification_email ?? '',
       '#description' => $this->t('Leave empty to send to all users of role Administrator'),
     ];
 

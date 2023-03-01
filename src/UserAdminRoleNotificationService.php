@@ -3,7 +3,6 @@
 namespace Drupal\user_admin_role_notification;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Mail\MailManagerInterface;
@@ -30,14 +29,14 @@ class UserAdminRoleNotificationService {
   /**
    * The mail manager instance.
    *
-   * @var Drupal\Core\Mail\MailManager
+   * @var \Drupal\Core\Mail\MailManager
    */
   protected $mailManager;
 
   /**
    * The link generator instance.
    *
-   * @var Drupal\Core\Mail\MailManager
+   * @var \Drupal\Core\Utility\LinkGenerator
    */
   protected $linkGenerator;
 
@@ -69,14 +68,14 @@ class UserAdminRoleNotificationService {
       ->condition('roles', ['administrator'], 'IN')
       ->accessCheck(FALSE)
       ->execute();
- 
+
     return $ids;
   }
 
   /**
    * Send Eamil.
    *
-   * @param Drupal\Core\Session\AccountInterface $account
+   * @param \Drupal\Core\Session\AccountInterface $account
    *   The account that was created or updated.
    * @param bool $is_new
    *   Flag for whether account was newly created, or updated.
@@ -85,9 +84,9 @@ class UserAdminRoleNotificationService {
     global $base_url;
     $config = $this->getConfigs();
     $enabled = $config->get('user_admin_role_notification_enabled');
-    
+
     if ($enabled) {
-      
+
       $user_name = $account->getDisplayName();
       $url = Url::fromUri($base_url . '/user/' . $account->id());
       $internal_link = $this->linkGenerator->generate($this->t('@title', ['@title' => $user_name]), $url);
@@ -95,9 +94,10 @@ class UserAdminRoleNotificationService {
         '@user_link' => $internal_link,
         '@action' => $is_new ? $this->t('created') : $this->t('added'),
       ];
+      // @codingStandardsIgnoreStart
       $subject = $this->t($config->get('user_admin_role_notification_email_subject'), $variables);
       $body = $this->t($config->get('user_admin_role_notification_email_body'), $variables);
-      
+      // @codingStandardsIgnoreEnd
       $admin_email = $config->get('user_admin_role_notification_email');
       if (empty($admin_email)) {
         $ids = $this->getUsersOfAdministratorRole();
@@ -112,13 +112,14 @@ class UserAdminRoleNotificationService {
         $admin_email = implode(',', $emails);
       }
       // Set a dummy no reply email if email list is not empty.
-      //$to = empty($admin_email) ? \Drupal::config('system.site')->get('mail') : 'noreply@noreply.com';
+      // @codingStandardsIgnoreStart
+      // $to = empty($admin_email) ? \Drupal::config('system.site')->get('mail') : 'noreply@noreply.com';
+      // @codingStandardsIgnoreEnd
       $to = \Drupal::config('system.site')->get('mail');
       $params = [
         'body' => $body,
         'subject' => $subject,
       ];
-
 
       if (!empty($admin_email)) {
         $params['bcc'] = $admin_email;
