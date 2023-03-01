@@ -1,0 +1,7 @@
+user_admin_role_notification.config_menu:
+  path: '/admin/config/people/accounts/user-admin-role-notification'
+  defaults:
+    _form: '\Drupal\user_admin_role_notification\Form\UserAdminRoleNotification'
+    _title: 'User Admin Role Notification Configuration'
+  requirements:
+   _permission: 'administer user admin role notification config'

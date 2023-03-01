@@ -1,0 +1,5 @@
+user_admin_role_notification.config_menu:
+  title: 'User Admin Role Notification Settings'
+  description: 'Settings for user admin role notification.'
+  route_name: user_admin_role_notification.config_menu
+  parent: entity.user.admin_form

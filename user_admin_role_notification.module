@@ -1,0 +1,46 @@
+<?php
+
+/**
+ * @file
+ * Contains user_admin_role_notification.module.
+ */
+
+use Drupal\Core\Session\AccountInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function user_admin_role_notification_user_update(AccountInterface $account) {
+  $original_roles = $account->original->getRoles(TRUE);
+  $updated_roles = $account->getRoles(TRUE);
+  if (!in_array('administrator', $original_roles) && in_array('administrator', $updated_roles)) {
+    $user_admin_role_notification_service = \Drupal::service('user_admin_role_notification.common');
+    $user_admin_role_notification_service->sendMail($account, FALSE);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function user_admin_role_notification_user_insert(AccountInterface $account) {
+  $updated_roles = $account->getRoles(TRUE);
+  if (in_array('administrator', $updated_roles)) {
+    $user_admin_role_notification_service = \Drupal::service('user_admin_role_notification.common');
+    $user_admin_role_notification_service->sendMail($account, TRUE);
+  }
+}
+
+/**
+ * Implements hook_mail().
+ */
+function user_admin_role_notification_mail($key, &$message, $params) {
+  switch ($key) {
+    case 'user_admin_role_notification_key':
+      if(isset($params['bcc'])) {
+        $message['headers']['bcc'] = $params['bcc'];
+      }
+      $message['subject'] = $params['subject'];
+      $message['body'][] = $params['body'];
+      break;
+  }
+}

@@ -1,0 +1,7 @@
+name: 'User Admin Role Notification'
+type: module
+description: 'Send notifications to users when administrator role is added'
+core_version_requirement: '^9 || ^10'
+package: 'Custom'
+dependencies:
+  - user

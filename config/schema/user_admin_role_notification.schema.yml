@@ -1,0 +1,16 @@
+user_admin_role_notification.settings:
+  type: config_object
+  label: 'User admin role notification settings'
+  mapping:
+    user_admin_role_notification_enabled:
+      type: integer
+      label: "User admin role notification enabled"
+    user_admin_role_notification_email:
+      type: string
+      label: "Email Id's receiving notification email"
+    user_admin_role_notification_email_subject:
+      type: label
+      label: 'Email subject'
+    user_admin_role_notification_email_body:
+      type: text
+      label: 'Email body'

@@ -1,0 +1,2 @@
+user_admin_role_notification_email_subject: 'Admin user @action'
+user_admin_role_notification_email_body: 'A new administrator user has been @action on your site: @user_link'

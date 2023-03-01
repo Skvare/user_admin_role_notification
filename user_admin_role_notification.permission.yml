@@ -1,0 +1,3 @@
+administer user admin role notification config:
+  title: 'Administer user admin role notification settings'
+  restrict access: true

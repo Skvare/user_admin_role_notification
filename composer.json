@@ -1,0 +1,10 @@
+{
+    "name": "drupal/user_admin_role_notification",
+    "type": "drupal-module",
+    "description": "Send email to users when administrator user created or role added",
+    "homepage": "https://git.skvare.com/Skvare/user_admin_role_notification",
+    "license": "GPL-2.0-or-later",
+    "require": {
+        "drupal/core": "^9 || ^10"
+    }
+}
