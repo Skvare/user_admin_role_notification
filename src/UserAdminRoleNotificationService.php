@@ -6,7 +6,6 @@ use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Url;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Mail\MailManagerInterface;
-use Drupal\user\Entity\User;
 use Drupal\Core\Utility\LinkGeneratorInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Logger\LoggerChannelTrait;
@@ -124,7 +123,8 @@ class UserAdminRoleNotificationService {
       // @codingStandardsIgnoreStart
       // $to = empty($admin_email) ? \Drupal::config('system.site')->get('mail') : 'noreply@noreply.com';
       // @codingStandardsIgnoreEnd
-      $to = \Drupal::config('system.site')->get('mail');
+      $system_site_email = $this->configFactory->get('system.site')->get('mail');
+      $to = $system_site_email;
       $params = [
         'body' => $body,
         'subject' => $subject,
@@ -138,11 +138,11 @@ class UserAdminRoleNotificationService {
         return;
       }
       $key = 'user_admin_role_notification_key';
-      if (empty($to) || empty(\Drupal::config('system.site')->get('mail'))) {
+      if (empty($to) || empty($system_site_email)) {
         $this->getLogger('user_admin_role_notification')->error($this->t('From and To email addresses should not be empty.'));
         return;
       }
-      $this->mailManager->mail('user_admin_role_notification', $key, $to, 'en', $params, \Drupal::config('system.site')->get('mail'), TRUE);
+      $this->mailManager->mail('user_admin_role_notification', $key, $to, 'en', $params, $system_site_email, TRUE);
       $this->getLogger('user_admin_role_notification')->notice($this->t('User admin role notification sent to @emails.', ['@emails' => $admin_email]));
     }
   }
