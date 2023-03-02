@@ -105,7 +105,7 @@ class UserAdminRoleNotification extends ConfigFormBase {
    * @inheritDoc
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    $user_input_values = $form_state->getUserInput();
+    // $user_input_values = $form_state->getUserInput();
 
   }
 
