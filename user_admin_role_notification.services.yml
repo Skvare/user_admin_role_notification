@@ -2,4 +2,4 @@ services:
 
   user_admin_role_notification.common:
     class: Drupal\user_admin_role_notification\UserAdminRoleNotificationService
-    arguments: ['@config.factory', '@plugin.manager.mail', '@link_generator']
+    arguments: ['@config.factory', '@plugin.manager.mail', '@link_generator', '@entity_type.manager']

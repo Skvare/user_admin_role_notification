@@ -10,6 +10,7 @@ use Drupal\user\Entity\User;
 use Drupal\Core\Utility\LinkGeneratorInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Logger\LoggerChannelTrait;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * UserAdminRoleNotificationService implement helper service class.
@@ -41,12 +42,20 @@ class UserAdminRoleNotificationService {
   protected $linkGenerator;
 
   /**
+   * The entity type manager.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Creates a verbose messenger.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, MailManagerInterface $mailManager, LinkGeneratorInterface $linkGenerator) {
+  public function __construct(ConfigFactoryInterface $config_factory, MailManagerInterface $mailManager, LinkGeneratorInterface $linkGenerator, EntityTypeManagerInterface $entityTypeManager) {
     $this->configFactory = $config_factory;
     $this->mailManager = $mailManager;
     $this->linkGenerator = $linkGenerator;
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
@@ -63,8 +72,8 @@ class UserAdminRoleNotificationService {
    *   Array of User Uids.
    */
   public function getUsersOfAdministratorRole() {
-    $ids = \Drupal::entityQuery('user')
-      ->condition('status', 1)
+    $query = $this->entityTypeManager->getStorage('user')->getQuery();
+    $ids = $query->condition('status', 1)
       ->condition('roles', ['administrator'], 'IN')
       ->accessCheck(FALSE)
       ->execute();
@@ -104,7 +113,7 @@ class UserAdminRoleNotificationService {
         // Do we exclude the newly minted administrator user from the list?
         $emails = [];
         if (count($ids)) {
-          $users = User::loadMultiple($ids);
+          $users = $this->entityTypeManager->getStorage('user')->loadMultiple($ids);
           foreach ($users as $userload) {
             $emails[] = $userload->getEmail();
           }
