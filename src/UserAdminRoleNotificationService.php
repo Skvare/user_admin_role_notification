@@ -67,13 +67,16 @@ class UserAdminRoleNotificationService {
   /**
    * Get users of roles.
    *
+   * @param string $role
+   *   Machine name of role.
+   *
    * @return array
    *   Array of User Uids.
    */
-  public function getUsersOfAdministratorRole() {
+  public function getUsersOfRole($role) {
     $query = $this->entityTypeManager->getStorage('user')->getQuery();
     $ids = $query->condition('status', 1)
-      ->condition('roles', ['administrator'], 'IN')
+      ->condition('roles', [$role], 'IN')
       ->accessCheck(FALSE)
       ->execute();
 
@@ -85,31 +88,48 @@ class UserAdminRoleNotificationService {
    *
    * @param \Drupal\Core\Session\AccountInterface $account
    *   The account that was created or updated.
-   * @param bool $is_new
-   *   Flag for whether account was newly created, or updated.
+   * @param int $operation
+   *   Operation that was performed.
    */
-  public function sendMail(AccountInterface $account, $is_new = FALSE) {
+  public function sendMail(AccountInterface $account, $operation = 1) {
     global $base_url;
     $config = $this->getConfigs();
     $enabled = $config->get('user_admin_role_notification_enabled');
 
     if ($enabled) {
-
       $user_name = $account->getDisplayName();
       $url = Url::fromUri($base_url . '/user/' . $account->id());
       $internal_link = $this->linkGenerator->generate($this->t('@title', ['@title' => $user_name]), $url);
+      switch ($operation) {
+        case 1:
+          $action = $this->t('created');
+          break;
+        case 2:
+          $action = $this->t('added');
+          break;
+        case 3:
+          $action = $this->t('removed');
+          break;
+        case 4:
+          $action = $this->t('deleted');
+          $internal_link = $user_name;
+          break;
+        default:
+          $action = '';
+          break;
+      }
       $variables = [
         '@user_link' => $internal_link,
-        '@action' => $is_new ? $this->t('created') : $this->t('added'),
+        '@action' => $action,
       ];
       // @codingStandardsIgnoreStart
       $subject = $this->t($config->get('user_admin_role_notification_email_subject'), $variables);
       $body = $this->t($config->get('user_admin_role_notification_email_body'), $variables);
       // @codingStandardsIgnoreEnd
-      $admin_email = $config->get('user_admin_role_notification_email');
-      if (empty($admin_email)) {
-        $ids = $this->getUsersOfAdministratorRole();
-        // Do we exclude the newly minted administrator user from the list?
+      $other_emails = $config->get('user_admin_role_notification_email');
+      $send_to_role = $config->get('user_admin_role_notification_send_to_role');
+      if (!empty($send_to_role)) {
+        $ids = $this->getUsersOfRole($send_to_role);
         $emails = [];
         if (count($ids)) {
           $users = $this->entityTypeManager->getStorage('user')->loadMultiple($ids);
@@ -118,7 +138,14 @@ class UserAdminRoleNotificationService {
           }
         }
         $admin_email = implode(',', $emails);
+        if (!empty($other_emails)) {
+          $admin_email .= ',';
+        }
       }
+      if (!empty($other_emails)) {
+        $admin_email .= $other_emails;
+      }
+      error_log('Emails to receive: ' . $admin_email);
       // Set a dummy no reply email if email list is not empty.
       // @codingStandardsIgnoreStart
       // $to = empty($admin_email) ? \Drupal::config('system.site')->get('mail') : 'noreply@noreply.com';

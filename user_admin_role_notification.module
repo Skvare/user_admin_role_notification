@@ -13,9 +13,19 @@ use Drupal\Core\Session\AccountInterface;
 function user_admin_role_notification_user_update(AccountInterface $account) {
   $original_roles = $account->original->getRoles(TRUE);
   $updated_roles = $account->getRoles(TRUE);
-  if (!in_array('administrator', $original_roles) && in_array('administrator', $updated_roles)) {
+  $trigger_role = \Drupal::config('user_admin_role_notification.settings')->get('user_admin_role_notification_trigger_role');
+  if (empty($trigger_role)) {
+    return;
+  }
+  // Admin role added.
+  if (!in_array($trigger_role, $original_roles) && in_array($trigger_role, $updated_roles)) {
     $user_admin_role_notification_service = \Drupal::service('user_admin_role_notification.common');
-    $user_admin_role_notification_service->sendMail($account, FALSE);
+    $user_admin_role_notification_service->sendMail($account, 2);
+  }
+  // Admin role removed.
+  if (in_array($trigger_role, $original_roles) && !in_array($trigger_role, $updated_roles)) {
+    $user_admin_role_notification_service = \Drupal::service('user_admin_role_notification.common');
+    $user_admin_role_notification_service->sendMail($account, 3);
   }
 }
 
@@ -24,9 +34,28 @@ function user_admin_role_notification_user_update(AccountInterface $account) {
  */
 function user_admin_role_notification_user_insert(AccountInterface $account) {
   $updated_roles = $account->getRoles(TRUE);
-  if (in_array('administrator', $updated_roles)) {
+  $trigger_role = \Drupal::config('user_admin_role_notification.settings')->get('user_admin_role_notification_trigger_role');
+  if (empty($trigger_role)) {
+    return;
+  }
+  if (in_array($trigger_role, $updated_roles)) {
     $user_admin_role_notification_service = \Drupal::service('user_admin_role_notification.common');
-    $user_admin_role_notification_service->sendMail($account, TRUE);
+    $user_admin_role_notification_service->sendMail($account, 1);
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function user_admin_role_notification_user_delete(AccountInterface $account) {
+  $roles = $account->getRoles(TRUE);
+  $trigger_role = \Drupal::config('user_admin_role_notification.settings')->get('user_admin_role_notification_trigger_role');
+  if (empty($trigger_role)) {
+    return;
+  }
+  if (in_array($trigger_role, $roles)) {
+    $user_admin_role_notification_service = \Drupal::service('user_admin_role_notification.common');
+    $user_admin_role_notification_service->sendMail($account, 4);
   }
 }
 

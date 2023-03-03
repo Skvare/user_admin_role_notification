@@ -59,13 +59,33 @@ class UserAdminRoleNotification extends ConfigFormBase {
       '#type' => 'checkbox',
       '#default_value' => !empty($user_admin_role_notification_enabled) ? 1 : 0,
     ];
-
+    $send_to_role = $config->get('user_admin_role_notification_send_to_role');
+    $roles[''] = '- None -';
+    $roles += user_role_names(TRUE);
+    if (isset($roles['authenticated'])) {
+      unset($roles['authenticated']);
+    }
+    $form['user_admin_role_notification_send_to_role'] = [
+      '#title' => $this->t('Send notifications to users of role'),
+      '#type' => 'select',
+      '#options' => $roles,
+      '#default_value' => !empty($send_to_role) ? $send_to_role : '',
+      '#description' => $this->t('Users of this role will receive notifications'),
+    ];
+    $trigger_role = $config->get('user_admin_role_notification_trigger_role');
+    $form['user_admin_role_notification_trigger_role'] = [
+      '#title' => $this->t('Role to trigger notifications'),
+      '#type' => 'select',
+      '#options' => $roles,
+      '#default_value' => !empty($trigger_role) ? $trigger_role : '',
+      '#description' => $this->t('Users of this role will trigger sending of notifications on create/add/remove/delete'),
+    ];
     $user_admin_role_notification_email = $config->get('user_admin_role_notification_email');
     $form['user_admin_role_notification_email'] = [
       '#type' => 'textarea',
-      '#title' => $this->t("Email Id's to whom the notification is to be sent, add comma separated emails in case of multiple recipients"),
+      '#title' => $this->t("Additional email addresses to whom the notification is to be sent"),
       '#default_value' => $user_admin_role_notification_email ?? '',
-      '#description' => $this->t('Leave empty to send to all users of role Administrator'),
+      '#description' => $this->t('If multiple, comma separate list, without comma at the end'),
     ];
 
     $form['user_admin_role_notification_email_fieldset'] = [
@@ -105,7 +125,10 @@ class UserAdminRoleNotification extends ConfigFormBase {
    * @inheritDoc
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // $user_input_values = $form_state->getUserInput();
+    $user_input_values = $form_state->getUserInput();
+    if (!empty($user_input_values['user_admin_role_notification_email']) && substr($user_input_values['user_admin_role_notification_email'], -1) == ',') {
+      $form_state->setErrorByName('user_admin_role_notification_email', $this->t('Additional email addresses must not end with comma'));
+    }
   }
 
   /**
@@ -117,6 +140,8 @@ class UserAdminRoleNotification extends ConfigFormBase {
     $user_input_values = $form_state->getUserInput();
     $config = $this->configFactory->getEditable('user_admin_role_notification.settings');
     $config->set('user_admin_role_notification_enabled', $user_input_values['user_admin_role_notification_enabled']);
+    $config->set('user_admin_role_notification_send_to_role', $user_input_values['user_admin_role_notification_send_to_role']);
+    $config->set('user_admin_role_notification_trigger_role', $user_input_values['user_admin_role_notification_trigger_role']);
     $config->set('user_admin_role_notification_email', $user_input_values['user_admin_role_notification_email']);
     $config->set('user_admin_role_notification_email_subject', $user_input_values['user_admin_role_notification_email_subject']);
     $config->set('user_admin_role_notification_email_body', $user_input_values['user_admin_role_notification_email_body']);

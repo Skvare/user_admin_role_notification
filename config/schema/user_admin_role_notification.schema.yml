@@ -5,6 +5,12 @@ user_admin_role_notification.settings:
     user_admin_role_notification_enabled:
       type: integer
       label: "User admin role notification enabled"
+    user_admin_role_notification_send_to_role:
+      type: string
+      label: "Role to send notification emails to"
+    user_admin_role_notification_trigger_role:
+      type: string
+      label: "Actions on users of this role will trigger notifications"
     user_admin_role_notification_email:
       type: string
       label: "Email Id's receiving notification email"
