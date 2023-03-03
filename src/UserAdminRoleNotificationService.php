@@ -104,16 +104,20 @@ class UserAdminRoleNotificationService {
         case 1:
           $action = $this->t('created');
           break;
+
         case 2:
           $action = $this->t('added');
           break;
+
         case 3:
           $action = $this->t('removed');
           break;
+
         case 4:
           $action = $this->t('deleted');
           $internal_link = $user_name;
           break;
+
         default:
           $action = '';
           break;
